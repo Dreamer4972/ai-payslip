@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>AI Payslip Generator</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    body { font-family: Arial; padding:40px; background:#f4f4f4;}
+    .box { background:white; padding:30px; width:400px; margin:auto; }
+    input, select { width:100%; padding:8px; margin:8px 0; }
+    button { width:100%; padding:10px; background:black; color:white; border:none; }
+    table { width:100%; margin-top:20px; border-collapse: collapse;}
+    table, th, td { border:1px solid black; padding:8px; }
+  </style>
+</head>
+<body>
+
+<div class="box">
+<h2>AI Salary Breakdown</h2>
+
+<input type="text" id="company" placeholder="Company Name">
+<input type="number" id="ctc" placeholder="Monthly CTC (e.g. 50000)">
+<select id="country">
+  <option value="India">India</option>
+  <option value="USA">USA</option>
+</select>
+
+<button onclick="generate()">Generate Payslip</button>
+
+<div id="result"></div>
+</div>
+
+<script>
+async function generate(){
+  const company = document.getElementById("company").value;
+  const ctc = document.getElementById("ctc").value;
+  const country = document.getElementById("country").value;
+
+  const res = await fetch("/.netlify/functions/generate", {
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body: JSON.stringify({ company, ctc, country })
+  });
+
+  const data = await res.json();
+
+  document.getElementById("result").innerHTML = `
+    <table>
+      <tr><th>Earnings</th><th>Amount</th></tr>
+      <tr><td>Basic</td><td>${data.basic}</td></tr>
+      <tr><td>HRA</td><td>${data.hra}</td></tr>
+      <tr><td>Special Allowance</td><td>${data.special}</td></tr>
+      <tr><th>Deductions</th><th></th></tr>
+      <tr><td>Tax</td><td>${data.tax}</td></tr>
+      <tr><td>Net Salary</td><td>${data.net}</td></tr>
+    </table>
+  `;
+}
+</script>
+
+</body>
+</html>
